@@ -264,6 +264,10 @@ Code blocks, inline code, URLs, file paths, commands, headings, table structure,
 | **caveman-compress** | Input tokens (memory files loaded per session) | ~45% |
 | **Both together** | The whole conversation | Output + input both shrunk |
 
+## Security
+
+`caveman-compress` is flagged as Snyk High Risk due to subprocess and file I/O patterns detected by static analysis. This is a false positive — see [SECURITY.md](../SECURITY.md) for a full explanation of what the skill does and does not do.
+
 See the full [caveman-compress README](caveman-compress/README.md) for install, usage, and validation details.
 
 ## Star This Repo
