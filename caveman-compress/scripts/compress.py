@@ -28,7 +28,7 @@ def call_claude(prompt: str) -> str:
 
             client = anthropic.Anthropic(api_key=api_key)
             msg = client.messages.create(
-                model="claude-opus-4-5",
+                model=os.environ.get("CAVEMAN_MODEL", "claude-sonnet-4-5"),
                 max_tokens=8096,
                 messages=[{"role": "user", "content": prompt}],
             )
@@ -117,6 +117,13 @@ def compress_file(filepath: Path) -> bool:
     original_text = filepath.read_text(errors="ignore")
     backup_path = filepath.with_name(filepath.stem + ".original.md")
 
+    # Check if backup already exists to prevent accidental overwriting
+    if backup_path.exists():
+        print(f"⚠️ Backup file already exists: {backup_path}")
+        print("The original backup may contain important content.")
+        print("Aborting to prevent data loss. Please remove or rename the backup file if you want to proceed.")
+        return False
+
     # Step 1: Compress
     print("Compressing with Claude...")
     compressed = call_claude(build_compress_prompt(original_text))
@@ -135,7 +142,7 @@ def compress_file(filepath: Path) -> bool:
             print("Validation passed")
             break
 
-        print("❌ Validation failed:")
+        print("Validation failed:")
         for err in result.errors:
             print(f"   - {err}")
 
@@ -143,7 +150,7 @@ def compress_file(filepath: Path) -> bool:
             # Restore original on failure
             filepath.write_text(original_text)
             backup_path.unlink(missing_ok=True)
-            print("❌ Failed after retries — original restored")
+            print("Failed after retries — original restored")
             return False
 
         print("Fixing with Claude...")
